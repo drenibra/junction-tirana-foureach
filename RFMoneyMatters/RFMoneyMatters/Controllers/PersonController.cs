@@ -27,6 +27,7 @@ namespace RFMoneyMatters.Controllers
         {
             var persons = await _context.Persons
                 .Include(p => p.Goals)
+                .Include(e => e.Expenses)
                 .ToListAsync();
 
             var dtoList = _mapper.Map<List<PersonDto>>(persons);

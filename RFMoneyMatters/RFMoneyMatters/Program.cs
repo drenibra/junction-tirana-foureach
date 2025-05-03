@@ -19,6 +19,12 @@ builder.Services.AddDbContext<RaiDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
 
+builder.Services.AddCors(opt => {
+    opt.AddPolicy("CorsPolicy", policy => {
+        policy.AllowAnyMethod().AllowCredentials().AllowAnyHeader().WithOrigins("http://localhost:3000");
+    });
+});
+
 builder.Services.AddAutoMapper(typeof(Program).Assembly);
 
 builder.Services.AddEndpointsApiExplorer();
@@ -34,6 +40,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseCors("CorsPolicy");
 
 app.UseAuthorization();
 
