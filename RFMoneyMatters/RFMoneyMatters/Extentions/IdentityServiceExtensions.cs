@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using RFMoneyMatters.Configurations;
@@ -16,28 +17,34 @@ namespace RFMoneyMatters.Extentions
             {
                 opt.Password.RequireNonAlphanumeric = false;
             })
-                .AddEntityFrameworkStores<RaiDbContext>()
-                .AddSignInManager<SignInManager<Person>>();
+            .AddEntityFrameworkStores<RaiDbContext>()
+            .AddSignInManager<SignInManager<Person>>();
 
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["TokenKey"]));
+            // bind JWT settings, etc...
 
-            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(opt =>
+            services.AddAuthentication(options =>
             {
-                opt.TokenValidationParameters = new TokenValidationParameters
-                {
-                    ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = key,
-                    ValidateIssuer = false,
-                    ValidateAudience = false
-                };
-            });
+                // we still use JWT for API auth…
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
 
+                // …but for SignInManager.SignOutAsync() we need this:
+                options.DefaultSignInScheme = IdentityConstants.ApplicationScheme;
+            })
+            // register the Identity.Application cookie
+            .AddCookie(IdentityConstants.ApplicationScheme, opts =>
+            {
+                opts.Cookie.Name = IdentityConstants.ApplicationScheme;
+                opts.Cookie.HttpOnly = true;
+                opts.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+            })
+            // then your JWT‐Bearer
+            .AddJwtBearer(/* ... */);
+
+            // no extra services.AddAuthentication() here
             services.AddScoped<TokenService>();
-
-
-            services.AddAuthentication();
-
             return services;
         }
+
     }
 }

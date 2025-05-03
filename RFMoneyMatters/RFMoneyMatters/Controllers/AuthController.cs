@@ -54,22 +54,40 @@ namespace RFMoneyMatters.Controllers
         }
 
         [HttpPost("login")]
-        public async Task<ActionResult<UserDto>> Login(LoginDto loginDto)
+        public async Task<IActionResult> Login(LoginDto loginDto)
         {
-            var user = await _userMgr.Users.FirstOrDefaultAsync(x => x.Email == loginDto.Email);
-
+            var user = await _userMgr.FindByEmailAsync(loginDto.Email);
             if (user == null) return Unauthorized();
 
             var result = await _signInMgr.CheckPasswordSignInAsync(user, loginDto.Password, false);
+            if (!result.Succeeded) return Unauthorized();
 
-            if (result.Succeeded)
+            // 1) create the JWT
+            var token = _tokenService.CreateToken(user);
+
+            // 2) create secure, HTTP-only cookie options
+            var cookieOptions = new CookieOptions
             {
-                return await CreateUserObject(user);
-            }
-            ;
+                HttpOnly = true,
+                Secure = true,                                    // set false for HTTP (dev), true for HTTPS (prod)
+                SameSite = SameSiteMode.None,
+                Expires = DateTime.UtcNow.AddMinutes(60),
+                Path = "/"
+            };
 
-            return Unauthorized();
+            // 3) append it
+            Response.Cookies.Append("token", token, cookieOptions);
+
+            // 4) return whatever you need in the body (you can omit the raw token now)
+            return Ok(new
+            {
+                id = user.Id,
+                email = user.Email,
+                username = user.UserName,
+                role = (await _userMgr.GetRolesAsync(user)).FirstOrDefault()
+            });
         }
+
 
         [Authorize]
         [HttpGet("me")]
@@ -88,36 +106,26 @@ namespace RFMoneyMatters.Controllers
             });
         }
 
-        // === Helpers ===
-        private string GenerateJwtToken(Person user)
+        [HttpPost("logout")]
+        public async Task<IActionResult> Logout()
         {
-            if (string.IsNullOrWhiteSpace(_jwtSettings.Secret))
-                throw new InvalidOperationException("JWT Secret is not configured.");
+            await _signInMgr.SignOutAsync();
 
-            // Now it’s safe:
-            var keyBytes = Encoding.UTF8.GetBytes(_jwtSettings.Secret);
-            var signingKey = new SymmetricSecurityKey(keyBytes);
-
-            var creds = new SigningCredentials(signingKey, SecurityAlgorithms.HmacSha256);
-
-            var claims = new[]
-            {
-                new Claim(JwtRegisteredClaimNames.Sub, user.Id),
-                new Claim(JwtRegisteredClaimNames.Email, user.Email),
-                new Claim("name", user.Name ?? ""),
-                // etc.
-            };
-
-            var token = new JwtSecurityToken(
-                issuer: _jwtSettings.Issuer,
-                audience: _jwtSettings.Audience,
-                claims: claims,
-                expires: DateTime.UtcNow.AddMinutes(_jwtSettings.ExpiryMinutes),
-                signingCredentials: creds
+            Response.Cookies.Delete(
+                "token",
+                new CookieOptions
+                {
+                    HttpOnly = true,
+                    Secure = true,
+                    SameSite = SameSiteMode.None,
+                    Path = "/"
+                }
             );
 
-            return new JwtSecurityTokenHandler().WriteToken(token);
+
+            return Ok(new { message = "Logout successful." });
         }
+
         private async Task<UserDto> CreateUserObject(Person user)
         {
             var roles = await _userMgr.GetRolesAsync(user);
@@ -132,5 +140,7 @@ namespace RFMoneyMatters.Controllers
                 Role = roles.FirstOrDefault()
             };
         }
+
+
     }
 }
