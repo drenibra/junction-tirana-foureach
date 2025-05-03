@@ -12,5 +12,8 @@
         public DateTime? LastActiveDate { get; set; }
         public int Coins { get; set; }
         public Goal Goals { get; set; }
+
+        public int LessonId { get; set; }
+        public Lesson Lesson { get; set; }
     }
 }

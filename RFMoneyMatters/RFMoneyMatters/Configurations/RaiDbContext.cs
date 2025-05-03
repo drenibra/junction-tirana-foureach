@@ -17,5 +17,9 @@ namespace RFMoneyMatters.Configurations
         public DbSet<Question> Questions { get; set; }
         public DbSet<ChallengeDefinition> ChallengeDefinitions { get; set; }
         public DbSet<UserChallenge> UserChallenges { get; set; }
+        public DbSet<LessonQuiz> LessonQuizzes { get; set; }
+        public DbSet<LessonQuizQuestion> LessonQuizQuestions { get; set; }
+        public DbSet<LessonQuizResult> LessonQuizResults { get; set; }
+
     }
 }
