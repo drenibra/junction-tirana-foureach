@@ -1,0 +1,87 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --primary: #2b2d33;
+  --primary-rgb: 43, 45, 51;
+  --secondary: #ffcc33;
+  --secondary-rgb: 255, 204, 51;
+}
+
+body {
+  @apply min-h-screen;
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-primary text-primary font-semibold py-3 px-6 rounded-full shadow-md hover:shadow-lg transition-all duration-200 active:scale-95;
+  }
+
+  .btn-secondary {
+    @apply bg-secondary text-primary font-semibold py-3 px-6 rounded-full shadow-md hover:shadow-lg transition-all duration-200 active:scale-95;
+  }
+
+  .input-field {
+    @apply w-full p-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-primary transition-colors;
+  }
+
+  .card {
+    @apply bg-white rounded-xl shadow-md p-4;
+  }
+
+  /* Lesson icon classes */
+  .lesson-icon {
+    width: 80px;
+    height: 80px;
+    object-fit: contain;
+    transition: transform 0.2s ease;
+  }
+
+  .lesson-icon-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 80px;
+    height: 80px;
+  }
+
+  .lesson-circle {
+    @apply relative rounded-full flex items-center justify-center cursor-pointer;
+    width: 32px;
+    height: 32px;
+    transition: transform 0.2s ease;
+  }
+
+  .lesson-circle-large {
+    width: 32px;
+    height: 32px;
+  }
+
+  .lesson-circle:hover {
+    transform: scale(1.05);
+  }
+
+  .lesson-badge {
+    @apply absolute -top-2 -right-2 border-2 border-white rounded-full flex items-center justify-center;
+    width: 12px;
+    height: 12px;
+  }
+}
+
+/* Quiz animations */
+@keyframes pulse-border {
+  0% {
+    box-shadow: 0 0 0 0 rgba(255, 204, 51, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(255, 204, 51, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 204, 51, 0);
+  }
+}
+
+.pulse-animation {
+  animation: pulse-border 2s infinite;
+}

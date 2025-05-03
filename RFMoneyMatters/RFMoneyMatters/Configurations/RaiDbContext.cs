@@ -20,6 +20,7 @@ namespace RFMoneyMatters.Configurations
         public DbSet<LessonQuiz> LessonQuizzes { get; set; }
         public DbSet<LessonQuizQuestion> LessonQuizQuestions { get; set; }
         public DbSet<LessonQuizResult> LessonQuizResults { get; set; }
+        public DbSet<Expense> Expenses { get; set; }
 
     }
 }

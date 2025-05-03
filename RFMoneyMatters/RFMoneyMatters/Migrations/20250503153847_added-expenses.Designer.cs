@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using RFMoneyMatters.Configurations;
@@ -11,9 +12,11 @@ using RFMoneyMatters.Configurations;
 namespace RFMoneyMatters.Migrations
 {
     [DbContext(typeof(RaiDbContext))]
-    partial class RaiDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250503153847_added-expenses")]
+    partial class addedexpenses
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -352,10 +355,12 @@ namespace RFMoneyMatters.Migrations
             modelBuilder.Entity("RFMoneyMatters.Models.Expense", b =>
                 {
                     b.HasOne("RFMoneyMatters.Models.Person", "Person")
-                        .WithMany("Goals")
+                        .WithMany("Expenses")
                         .HasForeignKey("PersonId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Person");
                 });
 
             modelBuilder.Entity("RFMoneyMatters.Models.Goal", b =>
@@ -451,7 +456,8 @@ namespace RFMoneyMatters.Migrations
 
             modelBuilder.Entity("RFMoneyMatters.Models.Lesson", b =>
                 {
-                    b.Navigation("Quiz");
+                    b.Navigation("Quiz")
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("RFMoneyMatters.Models.LessonQuiz", b =>
