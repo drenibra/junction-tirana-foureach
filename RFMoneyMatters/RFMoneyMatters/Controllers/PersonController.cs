@@ -1,7 +1,10 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using RFMoneyMatters.Configurations;
+using RFMoneyMatters.DTOs;
 using RFMoneyMatters.Models;
 
 namespace RFMoneyMatters.Controllers
@@ -11,64 +14,86 @@ namespace RFMoneyMatters.Controllers
     public class PersonController : ControllerBase
     {
         private readonly RaiDbContext _context;
+        private readonly IMapper _mapper;
 
-        public PersonController(RaiDbContext context)
+        public PersonController(RaiDbContext context, IMapper mapper)
         {
             _context = context;
+            _mapper = mapper;
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Person>>> GetPersons()
+        public async Task<ActionResult<IEnumerable<PersonDto>>> GetPersons()
         {
-            return await _context.Persons.ToListAsync();
+            var persons = await _context.Persons
+                .Include(p => p.Goals)
+                .ToListAsync();
+
+            var dtoList = _mapper.Map<List<PersonDto>>(persons);
+            return Ok(dtoList);
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<Person>> GetPerson(int id)
+        public async Task<ActionResult<PersonDto>> GetPerson(int id)
         {
-            var person = await _context.Persons.FindAsync(id);
+            var person = await _context.Persons
+                .Include(p => p.Goals)
+                .FirstOrDefaultAsync(p => p.Id == id);
+
             if (person == null)
-            {
                 return NotFound();
-            }
-            return person;
+
+            var dto = _mapper.Map<PersonDto>(person);
+            return Ok(dto);
         }
 
         [HttpPost]
-        public async Task<ActionResult<Person>> PostPerson(Person person)
+        public async Task<ActionResult<PersonDto>> PostPerson(CreatePersonDto personDto)
         {
+            var person = new Person
+            {
+                ClerckId = personDto.ClerckId,
+                Name = personDto.Name,
+                Age = personDto.Age,
+
+                Streak = 0,
+                CurrentStreak = 0,
+                LongestStreak = 0,
+                LastActiveDate = null,
+                Coins = 0,
+
+                Goals = new List<Goal>()
+            };
+
             _context.Persons.Add(person);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction(nameof(GetPerson), new { id = person.Id }, person);
+            var resultDto = _mapper.Map<PersonDto>(person);
+
+            return CreatedAtAction(nameof(GetPerson), new { id = person.Id }, resultDto);
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutPerson(int id, Person person)
+        public async Task<IActionResult> UpdatePerson(int id, UpdatePersonDto dto)
         {
-            if (id != person.Id)
-            {
-                return BadRequest();
-            }
+            if (dto == null)
+                return BadRequest("Payload cannot be null!");
 
-            _context.Entry(person).State = EntityState.Modified;
+            var person = await _context.Persons
+                .FirstOrDefaultAsync(p => p.Id == id);
 
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!PersonExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+            if (person == null)
+                return NotFound($"Person {id} not found.");
 
+            person.Name = dto.Name ?? person.Name;
+            person.Age = dto.Age ?? person.Age;
+            person.Streak = dto.Streak ?? person.Streak;
+            person.CurrentStreak = dto.CurrentStreak ?? person.CurrentStreak;
+            person.LongestStreak = dto.LongestStreak ?? person.LongestStreak;
+            person.LastActiveDate = dto.LastActiveDate ?? person.LastActiveDate;
+            person.Coins = dto.Coins ?? person.Coins;
+
+            await _context.SaveChangesAsync();
             return NoContent();
         }
 
@@ -77,9 +102,7 @@ namespace RFMoneyMatters.Controllers
         {
             var person = await _context.Persons.FindAsync(id);
             if (person == null)
-            {
                 return NotFound();
-            }
 
             _context.Persons.Remove(person);
             await _context.SaveChangesAsync();

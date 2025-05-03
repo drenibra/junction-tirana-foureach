@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using RFMoneyMatters.Configurations;
@@ -11,9 +12,11 @@ using RFMoneyMatters.Configurations;
 namespace RFMoneyMatters.Migrations
 {
     [DbContext(typeof(RaiDbContext))]
-    partial class RaiDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250503142357_updated-usermodel1")]
+    partial class updatedusermodel1
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -99,6 +102,9 @@ namespace RFMoneyMatters.Migrations
                     b.Property<int>("DifficultyLevel")
                         .HasColumnType("integer");
 
+                    b.Property<int?>("PersonId")
+                        .HasColumnType("integer");
+
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasColumnType("text");
@@ -108,6 +114,8 @@ namespace RFMoneyMatters.Migrations
                         .HasColumnType("text");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("PersonId");
 
                     b.ToTable("Lessons");
                 });
@@ -329,6 +337,13 @@ namespace RFMoneyMatters.Migrations
                     b.Navigation("Person");
                 });
 
+            modelBuilder.Entity("RFMoneyMatters.Models.Lesson", b =>
+                {
+                    b.HasOne("RFMoneyMatters.Models.Person", null)
+                        .WithMany("Lessons")
+                        .HasForeignKey("PersonId");
+                });
+
             modelBuilder.Entity("RFMoneyMatters.Models.LessonQuiz", b =>
                 {
                     b.HasOne("RFMoneyMatters.Models.Lesson", "Lesson")
@@ -425,6 +440,8 @@ namespace RFMoneyMatters.Migrations
             modelBuilder.Entity("RFMoneyMatters.Models.Person", b =>
                 {
                     b.Navigation("Goals");
+
+                    b.Navigation("Lessons");
                 });
 
             modelBuilder.Entity("RFMoneyMatters.Models.Questionnaire", b =>

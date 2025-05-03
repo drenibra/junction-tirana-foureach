@@ -8,7 +8,8 @@ namespace RFMoneyMatters.Configurations
     {
         public AutoMapperProfiles()
         {
-            CreateMap<Person, PersonDto>().ReverseMap();
+            CreateMap<Person, PersonDto>();
+            CreateMap<Person, UpdatePersonDto>().ReverseMap();
             CreateMap<Goal, GoalDto>().ReverseMap();
         }
     }
