@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Image from "next/image"
 import { motion, AnimatePresence } from "framer-motion"
 import { Plus, PieChart, X, Check, ArrowUp } from "lucide-react"
@@ -37,6 +37,10 @@ export default function Goals() {
   const [selectedGoal, setSelectedGoal] = useState<Goal | null>(null)
   const [showAddProgress, setShowAddProgress] = useState(false)
   const [progressAmount, setProgressAmount] = useState("")
+
+  useEffect(() => {
+    setShowExpenseTracker(true);
+  }, []);
 
   const handleAddProgress = () => {
     if (!selectedGoal || !progressAmount) return
