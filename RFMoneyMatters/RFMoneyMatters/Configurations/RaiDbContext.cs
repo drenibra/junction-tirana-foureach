@@ -1,10 +1,11 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using RFMoneyMatters.Models;
 using System.Collections.Generic;
 
 namespace RFMoneyMatters.Configurations
 {
-    public class RaiDbContext : DbContext
+    public class RaiDbContext : IdentityDbContext<Person>
     {
         public RaiDbContext(DbContextOptions<RaiDbContext> options) : base(options)
         {

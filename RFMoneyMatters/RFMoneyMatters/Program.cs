@@ -1,6 +1,8 @@
 using AutoMapper;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using RFMoneyMatters.Configurations;
+using RFMoneyMatters.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,6 +26,15 @@ builder.Services.AddCors(opt => {
         policy.AllowAnyMethod().AllowCredentials().AllowAnyHeader().WithOrigins("http://localhost:3000");
     });
 });
+builder.Services
+    .AddIdentity<Person, IdentityRole>(options =>
+    {
+        options.Password.RequireDigit = true;
+        options.Password.RequiredLength = 6;
+        options.User.RequireUniqueEmail = true;
+    })
+    .AddEntityFrameworkStores<RaiDbContext>()
+    .AddDefaultTokenProviders();
 
 builder.Services.AddAutoMapper(typeof(Program).Assembly);
 
@@ -41,8 +52,12 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+<<<<<<< HEAD
 app.UseCors("CorsPolicy");
 
+=======
+app.UseAuthentication();
+>>>>>>> 4ef8d9f274cac0f38075abf22142b32b63a128eb
 app.UseAuthorization();
 
 app.MapControllers();

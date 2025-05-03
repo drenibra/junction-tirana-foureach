@@ -1,10 +1,12 @@
-﻿namespace RFMoneyMatters.Models
+﻿using Microsoft.AspNetCore.Identity;
+
+namespace RFMoneyMatters.Models
 {
-    public class Person
+    public class Person : IdentityUser
     {
-        public int Id { get; set; }
-        public string? ClerckId { get; set; }
         public string Name { get; set; }
+
+        public string? ClerckId { get; set; }
         public int Age { get; set; }
         public int Streak { get; set; }
         public int CurrentStreak { get; set; }

@@ -39,7 +39,7 @@ namespace RFMoneyMatters.Controllers
         {
             var person = await _context.Persons
                 .Include(p => p.Goals)
-                .FirstOrDefaultAsync(p => p.Id == id);
+                .FirstOrDefaultAsync(p => p.Id == id.ToString());
 
             if (person == null)
                 return NotFound();
@@ -81,7 +81,7 @@ namespace RFMoneyMatters.Controllers
                 return BadRequest("Payload cannot be null!");
 
             var person = await _context.Persons
-                .FirstOrDefaultAsync(p => p.Id == id);
+                .FirstOrDefaultAsync(p => p.Id == id.ToString());
 
             if (person == null)
                 return NotFound($"Person {id} not found.");
@@ -113,7 +113,7 @@ namespace RFMoneyMatters.Controllers
 
         private bool PersonExists(int id)
         {
-            return _context.Persons.Any(e => e.Id == id);
+            return _context.Persons.Any(e => e.Id == id.ToString());
         }
     }
 }
