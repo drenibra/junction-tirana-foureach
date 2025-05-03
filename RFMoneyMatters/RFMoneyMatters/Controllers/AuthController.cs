@@ -1,9 +1,13 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using RFMoneyMatters.DTOs;
+using RFMoneyMatters.Interface;
 using RFMoneyMatters.Models;
+using RFMoneyMatters.Services;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -17,15 +21,21 @@ namespace RFMoneyMatters.Controllers
         private readonly UserManager<Person> _userMgr;
         private readonly SignInManager<Person> _signInMgr;
         private readonly IConfiguration _config;
+        private readonly JwtSettings _jwtSettings;
+        private readonly TokenService _tokenService;
 
         public AuthController(
             UserManager<Person> userMgr,
             SignInManager<Person> signInMgr,
-            IConfiguration config)
+            TokenService tokenService,
+            IConfiguration config,
+            IOptions<JwtSettings> jwtOptions)
         {
             _userMgr = userMgr;
             _signInMgr = signInMgr;
+            _tokenService = tokenService;
             _config = config;
+            _jwtSettings = jwtOptions.Value;
         }
 
         [HttpPost("register")]
@@ -44,24 +54,21 @@ namespace RFMoneyMatters.Controllers
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> Login(LoginDto dto)
+        public async Task<ActionResult<UserDto>> Login(LoginDto loginDto)
         {
-            var user = await _userMgr.FindByEmailAsync(dto.Email);
-            if (user == null)
-                return Unauthorized(new { error = "Invalid credentials." });
+            var user = await _userMgr.Users.FirstOrDefaultAsync(x => x.Email == loginDto.Email);
 
-            var check = await _signInMgr.CheckPasswordSignInAsync(user, dto.Password, false);
-            if (!check.Succeeded)
-                return Unauthorized(new { error = "Invalid credentials." });
+            if (user == null) return Unauthorized();
 
-            var token = GenerateJwtToken(user);
-            var expiresIn = _config.GetValue<int>("Jwt:DurationInMinutes");
+            var result = await _signInMgr.CheckPasswordSignInAsync(user, loginDto.Password, false);
 
-            return Ok(new
+            if (result.Succeeded)
             {
-                token,
-                expiresIn
-            });
+                return await CreateUserObject(user);
+            }
+            ;
+
+            return Unauthorized();
         }
 
         [Authorize]
@@ -84,26 +91,46 @@ namespace RFMoneyMatters.Controllers
         // === Helpers ===
         private string GenerateJwtToken(Person user)
         {
-            var jwt = _config.GetSection("Jwt");
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwt["Key"]));
-            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+            if (string.IsNullOrWhiteSpace(_jwtSettings.Secret))
+                throw new InvalidOperationException("JWT Secret is not configured.");
+
+            // Now it’s safe:
+            var keyBytes = Encoding.UTF8.GetBytes(_jwtSettings.Secret);
+            var signingKey = new SymmetricSecurityKey(keyBytes);
+
+            var creds = new SigningCredentials(signingKey, SecurityAlgorithms.HmacSha256);
 
             var claims = new[]
             {
                 new Claim(JwtRegisteredClaimNames.Sub, user.Id),
                 new Claim(JwtRegisteredClaimNames.Email, user.Email),
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+                new Claim("name", user.Name ?? ""),
+                // etc.
             };
 
             var token = new JwtSecurityToken(
-                issuer: jwt["Issuer"],
-                audience: jwt["Audience"],
+                issuer: _jwtSettings.Issuer,
+                audience: _jwtSettings.Audience,
                 claims: claims,
-                expires: DateTime.UtcNow.AddMinutes(_config.GetValue<int>("Jwt:DurationInMinutes")),
+                expires: DateTime.UtcNow.AddMinutes(_jwtSettings.ExpiryMinutes),
                 signingCredentials: creds
             );
 
             return new JwtSecurityTokenHandler().WriteToken(token);
+        }
+        private async Task<UserDto> CreateUserObject(Person user)
+        {
+            var roles = await _userMgr.GetRolesAsync(user);
+
+            return new UserDto
+            {
+                Id = user.Id,
+                Name = user.Name,
+                Token = _tokenService.CreateToken(user),
+                Username = user.UserName,
+                Email = user.Email,
+                Role = roles.FirstOrDefault()
+            };
         }
     }
 }

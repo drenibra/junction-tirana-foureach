@@ -6,7 +6,6 @@ namespace RFMoneyMatters.Models
     {
         public string Name { get; set; }
 
-        public string? ClerckId { get; set; }
         public int Age { get; set; }
         public int Streak { get; set; }
         public int CurrentStreak { get; set; }

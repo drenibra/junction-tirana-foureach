@@ -1,8 +1,16 @@
 using AutoMapper;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using Microsoft.IdentityModel.Tokens;
 using RFMoneyMatters.Configurations;
+using RFMoneyMatters.Controllers;
+using RFMoneyMatters.Extentions;
+using RFMoneyMatters.Interface;
 using RFMoneyMatters.Models;
+using RFMoneyMatters.Services;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,15 +29,13 @@ builder.Services.AddDbContext<RaiDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
 
-builder.Services
-    .AddIdentity<Person, IdentityRole>(options =>
-    {
-        options.Password.RequireDigit = true;
-        options.Password.RequiredLength = 6;
-        options.User.RequireUniqueEmail = true;
-    })
+builder.Services.AddIdentityCore<Person>().AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<RaiDbContext>()
     .AddDefaultTokenProviders();
+
+builder.Services.AddIdentityServices(builder.Configuration);
+builder.Services.AddScoped<AuthController>();
+
 
 builder.Services.AddAutoMapper(typeof(Program).Assembly);
 

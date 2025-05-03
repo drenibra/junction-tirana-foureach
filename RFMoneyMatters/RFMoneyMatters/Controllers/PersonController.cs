@@ -52,7 +52,6 @@ namespace RFMoneyMatters.Controllers
         {
             var person = new Person
             {
-                ClerckId = personDto.ClerckId,
                 Name = personDto.Name,
                 Age = personDto.Age,
 
