@@ -20,6 +20,10 @@ namespace RFMoneyMatters.Configurations
             CreateMap<UserChallenge, UserChallengeDto>().ReverseMap();
             CreateMap<UserChallenge, CreateUserChallengeDto>().ReverseMap();
             CreateMap<UserChallenge, UpdateUserChallengeStatusDto>().ReverseMap();
+
+            CreateMap<Expense, ExpenseDto>().ReverseMap();
+            CreateMap<Expense, CreateExpenseDto>().ReverseMap();
+
         }
     }
 }
