@@ -15,7 +15,7 @@
         public decimal Amount { get; set; }
         public DateTime Date { get; set; }
         public string Category { get; set; }
-        public int PersonId { get; set; }
+        public string PersonId { get; set; }
     }
 
 }

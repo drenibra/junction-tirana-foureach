@@ -4,7 +4,7 @@ namespace RFMoneyMatters.DTOs
 {
     public class LessonsQuizResultDto
     {
-        public int PersonId { get; set; }
+        public string PersonId { get; set; }
         public int LessonQuizId { get; set; }
         public int Score { get; set; }
         public bool IsCompleted { get; set; }
@@ -13,7 +13,7 @@ namespace RFMoneyMatters.DTOs
 
     public class CreateLessonsQuizResultDto
     {
-        public int PersonId { get; set; }
+        public string PersonId { get; set; }
         public int LessonQuizId { get; set; }
         public int Score { get; set; }
         public bool IsCompleted { get; set; }

@@ -25,7 +25,7 @@ namespace RFMoneyMatters.Controllers
         public async Task<ActionResult<List<UserChallengeDto>>> GetUserChallenges(int personId)
         {
             var userChallenges = await _context.UserChallenges
-                .Where(x => x.PersonId == personId)
+                .Where(x => x.PersonId.Equals(personId))
                 .ToListAsync();
 
             return Ok(_mapper.Map<List<UserChallengeDto>>(userChallenges));

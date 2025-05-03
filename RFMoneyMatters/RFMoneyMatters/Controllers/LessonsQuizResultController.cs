@@ -70,7 +70,7 @@ namespace RFMoneyMatters.Controllers
             if (dto == null)
                 return BadRequest("Payload cannot be null!");
 
-            if (personId != dto.PersonId || lessonQuizId != dto.LessonQuizId)
+            if (!personId.Equals(dto.PersonId) || lessonQuizId != dto.LessonQuizId)
                 return BadRequest("Route IDs must match payload.");
 
             var entity = await _context.LessonQuizResults

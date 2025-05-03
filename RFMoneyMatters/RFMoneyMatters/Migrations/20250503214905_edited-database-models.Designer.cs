@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using RFMoneyMatters.Configurations;
@@ -11,9 +12,11 @@ using RFMoneyMatters.Configurations;
 namespace RFMoneyMatters.Migrations
 {
     [DbContext(typeof(RaiDbContext))]
-    partial class RaiDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250503214905_edited-database-models")]
+    partial class editeddatabasemodels
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
