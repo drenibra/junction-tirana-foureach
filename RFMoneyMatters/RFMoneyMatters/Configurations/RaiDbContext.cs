@@ -23,5 +23,19 @@ namespace RFMoneyMatters.Configurations
         public DbSet<LessonQuizResult> LessonQuizResults { get; set; }
         public DbSet<Expense> Expenses { get; set; }
 
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+
+            // Person 1 — * Expense
+            modelBuilder.Entity<Person>()
+                .HasMany(p => p.Expenses)
+                .WithOne(e => e.Person)
+                .HasForeignKey(e => e.PersonId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+        }
+
     }
 }

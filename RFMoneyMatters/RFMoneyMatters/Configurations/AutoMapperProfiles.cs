@@ -28,6 +28,9 @@ namespace RFMoneyMatters.Configurations
             CreateMap<LessonQuizQuestion, LessonQuizQuestionDto>().ReverseMap();
             CreateMap<LessonQuizQuestion, LessonQuizQuestionDto>().ReverseMap();
 
+            CreateMap<LessonQuizResult, LessonsQuizResultDto>().ReverseMap();
+            CreateMap<LessonQuizResult, CreateLessonsQuizResultDto>().ReverseMap();
+
             CreateMap<ChallengeDefinition, ChallengeDefinitionDto>().ReverseMap();
             CreateMap<ChallengeDefinition, CreateChallengeDefinitionDto>().ReverseMap();
             CreateMap<ChallengeDefinition, UpdateChallengeDefinitionDto>().ReverseMap();

@@ -10,7 +10,7 @@
 
         public ExpenseCategory Category { get; set; }
 
-        public int PersonId { get; set; }
+        public string PersonId { get; set; }
         public Person Person { get; set; }
     }
 

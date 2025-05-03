@@ -25,7 +25,7 @@ namespace RFMoneyMatters.Controllers
         public async Task<ActionResult<List<ExpenseDto>>> GetUserExpenses(int personId)
         {
             var expenses = await _context.Expenses
-                .Where(e => e.PersonId == personId)
+                .Where(e => e.PersonId.Equals(personId))
                 .OrderByDescending(e => e.Date)
                 .ToListAsync();
 
@@ -48,7 +48,7 @@ namespace RFMoneyMatters.Controllers
         public async Task<ActionResult<ExpenseSummaryDto>> GetExpenseSummary(int personId)
         {
             var expenses = await _context.Expenses
-                .Where(e => e.PersonId == personId)
+                .Where(e => e.PersonId.Equals(personId))
                 .ToListAsync();
 
             if (!expenses.Any())
@@ -83,7 +83,7 @@ namespace RFMoneyMatters.Controllers
         public async Task<ActionResult> DeleteExpense(int id, int personId)
         {
             var expense = await _context.Expenses
-                .FirstOrDefaultAsync(e => e.Id == id && e.PersonId == personId);
+                .FirstOrDefaultAsync(e => e.Id == id && e.PersonId.Equals(personId));
 
             if (expense == null)
                 return NotFound("Expense not found or you don't have access to delete it");

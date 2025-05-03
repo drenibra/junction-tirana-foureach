@@ -29,6 +29,11 @@ builder.Services.AddDbContext<RaiDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
 
+builder.Services.AddCors(opt => {
+    opt.AddPolicy("CorsPolicy", policy => {
+        policy.AllowAnyMethod().AllowCredentials().AllowAnyHeader().WithOrigins("http://localhost:3000");
+    });
+});
 builder.Services.AddIdentityCore<Person>().AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<RaiDbContext>()
     .AddDefaultTokenProviders();
@@ -53,7 +58,10 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseCors("CorsPolicy");
+
 app.UseAuthentication();
+
 app.UseAuthorization();
 
 app.MapControllers();
