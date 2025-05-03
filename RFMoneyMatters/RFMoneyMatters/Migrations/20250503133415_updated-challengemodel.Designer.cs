@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using RFMoneyMatters.Configurations;
@@ -11,9 +12,11 @@ using RFMoneyMatters.Configurations;
 namespace RFMoneyMatters.Migrations
 {
     [DbContext(typeof(RaiDbContext))]
-    partial class RaiDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250503133415_updated-challengemodel")]
+    partial class updatedchallengemodel
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -79,7 +82,8 @@ namespace RFMoneyMatters.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("PersonId");
+                    b.HasIndex("PersonId")
+                        .IsUnique();
 
                     b.ToTable("Goals");
                 });
@@ -164,10 +168,6 @@ namespace RFMoneyMatters.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("UserAnswer")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.HasKey("Id");
 
                     b.HasIndex("LessonQuizId");
@@ -227,6 +227,9 @@ namespace RFMoneyMatters.Migrations
                     b.Property<DateTime?>("LastActiveDate")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<int>("LessonId")
+                        .HasColumnType("integer");
+
                     b.Property<int>("LongestStreak")
                         .HasColumnType("integer");
 
@@ -238,6 +241,8 @@ namespace RFMoneyMatters.Migrations
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("LessonId");
 
                     b.ToTable("Persons");
                 });
@@ -321,8 +326,8 @@ namespace RFMoneyMatters.Migrations
             modelBuilder.Entity("RFMoneyMatters.Models.Goal", b =>
                 {
                     b.HasOne("RFMoneyMatters.Models.Person", "Person")
-                        .WithMany("Goals")
-                        .HasForeignKey("PersonId")
+                        .WithOne("Goals")
+                        .HasForeignKey("RFMoneyMatters.Models.Goal", "PersonId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -368,6 +373,17 @@ namespace RFMoneyMatters.Migrations
                     b.Navigation("LessonQuiz");
 
                     b.Navigation("Person");
+                });
+
+            modelBuilder.Entity("RFMoneyMatters.Models.Person", b =>
+                {
+                    b.HasOne("RFMoneyMatters.Models.Lesson", "Lesson")
+                        .WithMany()
+                        .HasForeignKey("LessonId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Lesson");
                 });
 
             modelBuilder.Entity("RFMoneyMatters.Models.Question", b =>
@@ -424,7 +440,8 @@ namespace RFMoneyMatters.Migrations
 
             modelBuilder.Entity("RFMoneyMatters.Models.Person", b =>
                 {
-                    b.Navigation("Goals");
+                    b.Navigation("Goals")
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("RFMoneyMatters.Models.Questionnaire", b =>

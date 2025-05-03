@@ -6,7 +6,7 @@
         public string Title { get; set; }
         public string Category { get; set; } // e.g. Budgeting, Saving
         public string Description { get; set; }
-        public DateOnly ChallengeDate { get; set; }
+        public DateTime ChallengeDate { get; set; }
 
     }
 }
