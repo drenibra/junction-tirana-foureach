@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using RFMoneyMatters.Configurations;
 using RFMoneyMatters.DTOs;
+using RFMoneyMatters.Implementation.Interfaces;
 using RFMoneyMatters.Models;
 
 namespace RFMoneyMatters.Controllers
@@ -11,56 +12,27 @@ namespace RFMoneyMatters.Controllers
     [ApiController]
     public class GoalController : ControllerBase
     {
-        private readonly RaiDbContext _context;
-        private readonly IMapper _mapper;
+        private readonly IGoalService _goalService;
 
-        public GoalController(RaiDbContext context, IMapper mapper)
+        public GoalController(IGoalService goalService)
         {
-            _context = context;
-            _mapper = mapper;
+            _goalService = goalService;
         }
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<GoalDto>>> GetGoals()
-        {
-            var goals = await _context.Goals.ToListAsync();
-
-            var dtoList = _mapper.Map<List<GoalDto>>(goals);
-            return Ok(dtoList);
-        }
+            => await _goalService.GetGoalsAsync();
 
         [HttpGet("{id}")]
         public async Task<ActionResult<GoalDto>> GetGoal(int id)
-        {
-            var goal = await _context.Goals.FindAsync(id);
-            if (goal == null) return NotFound();
-            return Ok(_mapper.Map<GoalDto>(goal));
-        }
+            => await _goalService.GetGoalByIdAsync(id);
 
         [HttpPost]
         public async Task<ActionResult<GoalDto>> PostGoal(CreateGoalDto createDto)
-        {
-            var goal = _mapper.Map<Goal>(createDto);
-            goal.IsSet = false;
-            goal.ProgressPercentage = 0;
-            goal.CompletedDate = null;
-
-            _context.Goals.Add(goal);
-            await _context.SaveChangesAsync();
-
-            var goalDto = _mapper.Map<GoalDto>(goal);
-            return CreatedAtAction(nameof(GetGoal), new { id = goal.Id }, goalDto);
-        }
+            => await _goalService.CreateGoalAsync(createDto);
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteGoal(int id)
-        {
-            var goal = await _context.Goals.FindAsync(id);
-            if (goal == null) return NotFound();
-
-            _context.Goals.Remove(goal);
-            await _context.SaveChangesAsync();
-            return NoContent();
-        }
+            => await _goalService.DeleteGoalAsync(id);
     }
 }

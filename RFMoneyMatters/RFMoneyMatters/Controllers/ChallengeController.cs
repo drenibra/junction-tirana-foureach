@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using RFMoneyMatters.Configurations;
 using RFMoneyMatters.DTOs;
+using RFMoneyMatters.Implementation.Interfaces;
 using RFMoneyMatters.Models;
 
 namespace RFMoneyMatters.Controllers
@@ -12,69 +13,31 @@ namespace RFMoneyMatters.Controllers
     [ApiController]
     public class ChallengeController : ControllerBase
     {
-        private readonly RaiDbContext _context;
-        private readonly IMapper _mapper;
+        private readonly IChallengeService _challengeService;
 
-        public ChallengeController(RaiDbContext context, IMapper mapper)
+        public ChallengeController(IChallengeService challengeService)
         {
-            _context = context;
-            _mapper = mapper;
+            _challengeService = challengeService;
         }
 
         [HttpGet]
         public async Task<ActionResult<List<ChallengeDefinitionDto>>> GetAllChallenges()
-        {
-            var challenges = await _context.ChallengeDefinitions.ToListAsync();
-            return Ok(_mapper.Map<List<ChallengeDefinitionDto>>(challenges));
-        }
+            => await _challengeService.GetAllChallengesAsync();
 
         [HttpGet("{id}")]
         public async Task<ActionResult<ChallengeDefinitionDto>> GetChallenge(int id)
-        {
-            var challenge = await _context.ChallengeDefinitions.FindAsync(id);
-            if (challenge == null)
-                return NotFound("Challenge not found");
-
-            return Ok(_mapper.Map<ChallengeDefinitionDto>(challenge));
-        }
+            => await _challengeService.GetChallengeByIdAsync(id);
 
         [HttpPost]
         public async Task<ActionResult> CreateChallenge(CreateChallengeDefinitionDto dto)
-        {
-            var challenge = _mapper.Map<ChallengeDefinition>(dto);
-            challenge.ChallengeDate = DateTime.SpecifyKind(challenge.ChallengeDate, DateTimeKind.Utc);
-            await _context.ChallengeDefinitions.AddAsync(challenge);
-            await _context.SaveChangesAsync();
-
-            return Ok("Challenge successfully created");
-        }
+            => await _challengeService.CreateChallengeAsync(dto);
 
         [HttpPut("{id}")]
         public async Task<ActionResult> UpdateChallenge(int id, UpdateChallengeDefinitionDto dto)
-        {
-            var challenge = await _context.ChallengeDefinitions.FindAsync(id);
-            if (challenge == null)
-                return NotFound("Challenge not found");
-
-            challenge.Title = dto.Title ?? challenge.Title;
-            challenge.Category = dto.Category ?? challenge.Category;
-            challenge.Description = dto.Description ?? challenge.Description;
-            challenge.ChallengeDate = dto.ChallengeDate ?? challenge.ChallengeDate;
-
-            await _context.SaveChangesAsync();
-            return Ok("Challenge successfully updated");
-        }
+            => await _challengeService.UpdateChallengeAsync(id, dto);
 
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteChallenge(int id)
-        {
-            var challenge = await _context.ChallengeDefinitions.FindAsync(id);
-            if (challenge == null)
-                return NotFound("Challenge not found");
-
-            _context.ChallengeDefinitions.Remove(challenge);
-            await _context.SaveChangesAsync();
-            return Ok("Challenge successfully deleted");
-        }
+            => await _challengeService.DeleteChallengeAsync(id);
     }
 }

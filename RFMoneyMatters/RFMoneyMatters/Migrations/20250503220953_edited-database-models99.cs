@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace RFMoneyMatters.Migrations
 {
     /// <inheritdoc />
-    public partial class AddedUserIdentity : Migration
+    public partial class editeddatabasemodels99 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -207,17 +207,17 @@ namespace RFMoneyMatters.Migrations
                     Amount = table.Column<decimal>(type: "numeric", nullable: false),
                     Date = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     Category = table.Column<int>(type: "integer", nullable: false),
-                    PersonId = table.Column<int>(type: "integer", nullable: false),
-                    PersonId1 = table.Column<string>(type: "text", nullable: true)
+                    PersonId = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Expenses", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Expenses_AspNetUsers_PersonId1",
-                        column: x => x.PersonId1,
+                        name: "FK_Expenses_AspNetUsers_PersonId",
+                        column: x => x.PersonId,
                         principalTable: "AspNetUsers",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -231,17 +231,17 @@ namespace RFMoneyMatters.Migrations
                     ProgressPercentage = table.Column<double>(type: "double precision", nullable: false),
                     CompletedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     RewardCoins = table.Column<int>(type: "integer", nullable: false),
-                    PersonId = table.Column<int>(type: "integer", nullable: false),
-                    PersonId1 = table.Column<string>(type: "text", nullable: true)
+                    PersonId = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Goals", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Goals_AspNetUsers_PersonId1",
-                        column: x => x.PersonId1,
+                        name: "FK_Goals_AspNetUsers_PersonId",
+                        column: x => x.PersonId,
                         principalTable: "AspNetUsers",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -250,15 +250,14 @@ namespace RFMoneyMatters.Migrations
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    PersonId = table.Column<int>(type: "integer", nullable: false),
-                    PersonId1 = table.Column<string>(type: "text", nullable: false)
+                    PersonId = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Questionnaires", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Questionnaires_AspNetUsers_PersonId1",
-                        column: x => x.PersonId1,
+                        name: "FK_Questionnaires_AspNetUsers_PersonId",
+                        column: x => x.PersonId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -270,8 +269,7 @@ namespace RFMoneyMatters.Migrations
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    PersonId = table.Column<int>(type: "integer", nullable: false),
-                    PersonId1 = table.Column<string>(type: "text", nullable: false),
+                    PersonId = table.Column<string>(type: "text", nullable: false),
                     ChallengeDefinitionId = table.Column<int>(type: "integer", nullable: false),
                     IsCompleted = table.Column<bool>(type: "boolean", nullable: false),
                     AssignedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
@@ -281,8 +279,8 @@ namespace RFMoneyMatters.Migrations
                 {
                     table.PrimaryKey("PK_UserChallenges", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_UserChallenges_AspNetUsers_PersonId1",
-                        column: x => x.PersonId1,
+                        name: "FK_UserChallenges_AspNetUsers_PersonId",
+                        column: x => x.PersonId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -365,20 +363,21 @@ namespace RFMoneyMatters.Migrations
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    PersonId = table.Column<int>(type: "integer", nullable: false),
-                    PersonId1 = table.Column<string>(type: "text", nullable: true),
+                    PersonId = table.Column<string>(type: "text", nullable: false),
                     LessonQuizId = table.Column<int>(type: "integer", nullable: false),
                     Score = table.Column<int>(type: "integer", nullable: false),
-                    CompletedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                    IsCompleted = table.Column<bool>(type: "boolean", nullable: false),
+                    CompletedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_LessonQuizResults", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_LessonQuizResults_AspNetUsers_PersonId1",
-                        column: x => x.PersonId1,
+                        name: "FK_LessonQuizResults_AspNetUsers_PersonId",
+                        column: x => x.PersonId,
                         principalTable: "AspNetUsers",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_LessonQuizResults_LessonQuizzes_LessonQuizId",
                         column: x => x.LessonQuizId,
@@ -425,14 +424,14 @@ namespace RFMoneyMatters.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_Expenses_PersonId1",
+                name: "IX_Expenses_PersonId",
                 table: "Expenses",
-                column: "PersonId1");
+                column: "PersonId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Goals_PersonId1",
+                name: "IX_Goals_PersonId",
                 table: "Goals",
-                column: "PersonId1");
+                column: "PersonId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_LessonQuizQuestions_LessonQuizId",
@@ -445,9 +444,9 @@ namespace RFMoneyMatters.Migrations
                 column: "LessonQuizId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_LessonQuizResults_PersonId1",
+                name: "IX_LessonQuizResults_PersonId",
                 table: "LessonQuizResults",
-                column: "PersonId1");
+                column: "PersonId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_LessonQuizzes_LessonId",
@@ -456,9 +455,9 @@ namespace RFMoneyMatters.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_Questionnaires_PersonId1",
+                name: "IX_Questionnaires_PersonId",
                 table: "Questionnaires",
-                column: "PersonId1");
+                column: "PersonId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Questions_QuestionnaireId",
@@ -471,9 +470,9 @@ namespace RFMoneyMatters.Migrations
                 column: "ChallengeDefinitionId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_UserChallenges_PersonId1",
+                name: "IX_UserChallenges_PersonId",
                 table: "UserChallenges",
-                column: "PersonId1");
+                column: "PersonId");
         }
 
         /// <inheritdoc />

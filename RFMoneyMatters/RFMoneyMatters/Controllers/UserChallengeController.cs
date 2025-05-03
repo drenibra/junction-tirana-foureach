@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using RFMoneyMatters.Configurations;
 using RFMoneyMatters.DTOs;
+using RFMoneyMatters.Implementation.Interfaces;
 using RFMoneyMatters.Models;
 
 namespace RFMoneyMatters.Controllers
@@ -12,61 +13,27 @@ namespace RFMoneyMatters.Controllers
     [ApiController]
     public class UserChallengeController : ControllerBase
     {
-        private readonly RaiDbContext _context;
-        private readonly IMapper _mapper;
+        private readonly IUserChallengeService _service;
 
-        public UserChallengeController(RaiDbContext context, IMapper mapper)
+        public UserChallengeController(IUserChallengeService service)
         {
-            _context = context;
-            _mapper = mapper;
+            _service = service;
         }
 
         [HttpGet("user/{personId}")]
-        public async Task<ActionResult<List<UserChallengeDto>>> GetUserChallenges(int personId)
-        {
-            var userChallenges = await _context.UserChallenges
-                .Where(x => x.PersonId.Equals(personId))
-                .ToListAsync();
-
-            return Ok(_mapper.Map<List<UserChallengeDto>>(userChallenges));
-        }
+        public async Task<ActionResult<List<UserChallengeDto>>> GetUserChallenges(string personId)
+            => await _service.GetUserChallengesAsync(personId);
 
         [HttpPost]
         public async Task<ActionResult> AssignUserChallenge(CreateUserChallengeDto dto)
-        {
-            var userChallenge = _mapper.Map<UserChallenge>(dto);
-            await _context.UserChallenges.AddAsync(userChallenge);
-            await _context.SaveChangesAsync();
-            return Ok("User challenge assigned successfully");
-        }
+            => await _service.AssignUserChallengeAsync(dto);
 
         [HttpPatch("{id}")]
         public async Task<ActionResult> UpdateUserChallenge(int id, UpdateUserChallengeStatusDto dto)
-        {
-            var challenge = await _context.UserChallenges.FindAsync(id);
-            if (challenge == null)
-                return NotFound("User challenge not found");
-
-            if (dto.IsCompleted.HasValue)
-                challenge.IsCompleted = dto.IsCompleted.Value;
-
-            if (dto.CompletedDate.HasValue)
-                challenge.CompletedDate = dto.CompletedDate.Value;
-
-            await _context.SaveChangesAsync();
-            return Ok("User challenge status updated");
-        }
+            => await _service.UpdateUserChallengeStatusAsync(id, dto);
 
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteUserChallenge(int id)
-        {
-            var challenge = await _context.UserChallenges.FindAsync(id);
-            if (challenge == null)
-                return NotFound("User challenge not found");
-
-            _context.UserChallenges.Remove(challenge);
-            await _context.SaveChangesAsync();
-            return Ok("User challenge deleted");
-        }
+            => await _service.DeleteUserChallengeAsync(id);
     }
 }

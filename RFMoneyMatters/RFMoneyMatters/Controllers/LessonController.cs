@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using RFMoneyMatters.Configurations;
 using RFMoneyMatters.DTOs;
+using RFMoneyMatters.Implementation.Interfaces;
 using RFMoneyMatters.Models;
 
 namespace RFMoneyMatters.Controllers
@@ -11,83 +12,31 @@ namespace RFMoneyMatters.Controllers
     [ApiController]
     public class LessonController : ControllerBase
     {
-        private readonly RaiDbContext _context;
-        private readonly IMapper _mapper;
+        private readonly ILessonService _lessonService;
 
-        public LessonController(RaiDbContext context, IMapper mapper)
+        public LessonController(ILessonService lessonService)
         {
-            _context = context;
-            _mapper = mapper;
+            _lessonService = lessonService;
         }
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<LessonDto>>> GetLessons()
-        {
-            var lessons = await _context.Lessons
-                .ToListAsync();
-
-            var dtoList = _mapper.Map<List<LessonDto>>(lessons);
-            return Ok(dtoList);
-        }
+            => await _lessonService.GetLessonsAsync();
 
         [HttpGet("{id}")]
         public async Task<ActionResult<LessonDto>> GetLesson(int id)
-        {
-            var lesson = await _context.Lessons
-                .Include(l => l.Quiz)
-                .FirstOrDefaultAsync(l => l.Id == id);
-
-            if (lesson == null)
-                return NotFound();
-
-            return Ok(_mapper.Map<LessonDto>(lesson));
-        }
+            => await _lessonService.GetLessonByIdAsync(id);
 
         [HttpPost]
         public async Task<ActionResult<LessonDto>> PostLesson(CreateLessonDto createDto)
-        {
-            var lesson = _mapper.Map<Lesson>(createDto);
-
-            _context.Lessons.Add(lesson);
-            await _context.SaveChangesAsync();
-
-            var resultDto = _mapper.Map<LessonDto>(lesson);
-            return CreatedAtAction(nameof(GetLesson),
-                                   new { id = lesson.Id },
-                                   resultDto);
-        }
+            => await _lessonService.CreateLessonAsync(createDto);
 
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateLesson(int id, UpdateLessonDto dto)
-        {
-            if (dto == null)
-                return BadRequest("Payload cannot be null!");
-
-            var lesson = await _context.Lessons
-                .FirstOrDefaultAsync(l => l.Id == id);
-
-            if (lesson == null)
-                return NotFound($"Lesson {id} not found.");
-
-            lesson.Title = dto.Title ?? lesson.Title;
-            lesson.Type = dto.Type ?? lesson.Type;
-            lesson.Content = dto.Content ?? lesson.Content;
-            lesson.DifficultyLevel = dto.DifficultyLevel ?? lesson.DifficultyLevel;
-
-            await _context.SaveChangesAsync();
-            return NoContent();
-        }
+            => await _lessonService.UpdateLessonAsync(id, dto);
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteLesson(int id)
-        {
-            var lesson = await _context.Lessons.FindAsync(id);
-            if (lesson == null)
-                return NotFound();
-
-            _context.Lessons.Remove(lesson);
-            await _context.SaveChangesAsync();
-            return NoContent();
-        }
+            => await _lessonService.DeleteLessonAsync(id);
     }
 }

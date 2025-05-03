@@ -2,6 +2,8 @@ using AutoMapper;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using RFMoneyMatters.Configurations;
+using RFMoneyMatters.Implementation.Interfaces;
+using RFMoneyMatters.Implementation.Services;
 using RFMoneyMatters.Models;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -37,6 +39,14 @@ builder.Services
     .AddDefaultTokenProviders();
 
 builder.Services.AddAutoMapper(typeof(Program).Assembly);
+
+builder.Services.AddScoped<IGoalService, GoalService>();
+builder.Services.AddScoped<ILessonService, LessonService>();
+builder.Services.AddScoped<IExpenseService, ExpenseService>();
+builder.Services.AddScoped<IChallengeService, ChallengeService>();
+builder.Services.AddScoped<ILessonQuizService, LessonQuizService>();
+builder.Services.AddScoped<ILessonQuizResultService, LessonQuizResultService>();
+builder.Services.AddScoped<IUserChallengeService, UserChallengeService>();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

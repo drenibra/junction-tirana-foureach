@@ -12,8 +12,8 @@ using RFMoneyMatters.Configurations;
 namespace RFMoneyMatters.Migrations
 {
     [DbContext(typeof(RaiDbContext))]
-    [Migration("20250503214905_edited-database-models")]
-    partial class editeddatabasemodels
+    [Migration("20250503220953_edited-database-models99")]
+    partial class editeddatabasemodels99
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
