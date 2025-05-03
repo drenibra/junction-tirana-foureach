@@ -4,7 +4,9 @@ import BottomNavigation from "@/components/bottom-navigation";
 import { motion } from "framer-motion";
 import { Award, LogOut, Settings } from "lucide-react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
+import agent from "../api_calls/agent";
 
 export default function Profile() {
   const [user] = useState({
@@ -18,6 +20,13 @@ export default function Profile() {
       { id: 2, name: "Saving Star", icon: "💰", date: "1 day ago" },
     ],
   });
+
+  const router = useRouter();
+
+  const handleSignOut = async () => {
+    await agent.Auth.logout();
+    router.push("/signup");
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
@@ -119,7 +128,10 @@ export default function Profile() {
             <span>Settings</span>
           </button>
 
-          <button className="w-full flex items-center p-3 bg-white rounded-lg border border-gray-200">
+          <button
+            onClick={handleSignOut}
+            className="w-full flex items-center p-3 bg-white rounded-lg border border-gray-200"
+          >
             <LogOut size={20} className="mr-3 text-gray-500" />
             <span>Sign Out</span>
           </button>
