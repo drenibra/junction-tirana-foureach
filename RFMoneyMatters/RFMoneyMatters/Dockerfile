@@ -5,7 +5,7 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /app
 
 # Copy the .csproj and restore dependencies (via NuGet)
-COPY RFMoneyMatters/RFMoneyMatters.csproj ./RFMoneyMatters/
+COPY ./RFMoneyMatters/RFMoneyMatters.csproj ./RFMoneyMatters/
 
 # Restore the dependencies
 RUN dotnet restore RFMoneyMatters/RFMoneyMatters.csproj
