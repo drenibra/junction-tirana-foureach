@@ -1,6 +1,6 @@
 # RFMoneyMatters
 
-An interactive, gamified financial-education platform for teens (12–17), built with a .NET 6 Web API backend, Next.js frontend, and PostgreSQL database.
+An interactive, gamified financial-education platform for teens (12–17), built with a .NET 8 Web API backend, Next.js frontend, and PostgreSQL database.
 
 ---
 
@@ -14,7 +14,6 @@ An interactive, gamified financial-education platform for teens (12–17), built
 - [Database Migrations](#database-migrations)  
 - [Frontend Setup](#frontend-setup)  
 - [Running the Application](#running-the-application)  
-- [License](#license)
 
 ---
 
@@ -123,6 +122,3 @@ NEXT_PUBLIC_API_URL=http://localhost:5116/api
   Open http://localhost:3000 in your browser.
 
 #### You should now be able to register, login, take quizzes, track expenses, and chat with the AI assistant.
-
-## License
-  This project is MIT-licensed. See LICENSE for details.
