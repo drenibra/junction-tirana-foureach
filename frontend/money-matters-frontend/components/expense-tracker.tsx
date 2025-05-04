@@ -1,10 +1,8 @@
 "use client";
 
-import agent from "@/app/api_calls/agent";
 import { AnimatePresence, motion } from "framer-motion";
 import { ArrowLeft, Check, Plus, X } from "lucide-react";
-import { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
+import { useState } from "react";
 
 type Expense = {
   id: number;
@@ -14,31 +12,12 @@ type Expense = {
   date: Date;
 };
 
-type Summary = {
-  total: number;
-  needs: number;
-  wants: number;
-  needsPercentage: number;
-  wantsPercentage: number;
-};
-
 type ExpenseTrackerProps = {
   onClose: () => void;
 };
 
 export default function ExpenseTracker({ onClose }: ExpenseTrackerProps) {
-  const user = useSelector((state: any) => state.user);
-
   const [expenses, setExpenses] = useState<Expense[]>([]);
-  const personId = 3;
-  const [summary, setSummary] = useState<Summary>({
-    total: 0,
-    needs: 0,
-    wants: 0,
-    needsPercentage: 0,
-    wantsPercentage: 0,
-  });
-
   const [showAddExpense, setShowAddExpense] = useState(false);
   const [newExpense, setNewExpense] = useState<{
     name: string;
@@ -50,78 +29,46 @@ export default function ExpenseTracker({ onClose }: ExpenseTrackerProps) {
     category: "need",
   });
 
-  const fetchExpenses = async () => {
-    try {
-      const data = await agent.Expenses.getByUser(user.id);
-      console.log("data", data);
-
-      setExpenses(
-        data.map((e: any) => ({
-          ...e,
-          date: new Date(e.date),
-          category: e.category.toLowerCase() as "need" | "want",
-        }))
-      );
-      const sum = await agent.Expenses.getSummary(user.id);
-      setSummary({
-        total: sum.total,
-        needs: sum.needs,
-        wants: sum.wants,
-        needsPercentage: sum.needsPercentage,
-        wantsPercentage: sum.wantsPercentage,
-      });
-    } catch (err) {
-      console.error("Failed to fetch expenses", err);
-    }
-  };
-
-  useEffect(() => {
-    fetchExpenses();
-  }, []);
-
-  const totalExpenses = expenses.reduce(
-    (sum, expense) => sum + expense.amount,
-    0
-  );
+  // Derived totals
+  const totalExpenses = expenses.reduce((sum, e) => sum + e.amount, 0);
   const needsTotal = expenses
-    .filter((expense) => expense.category === "need")
-    .reduce((sum, expense) => sum + expense.amount, 0);
+    .filter((e) => e.category === "need")
+    .reduce((sum, e) => sum + e.amount, 0);
   const wantsTotal = expenses
-    .filter((expense) => expense.category === "want")
-    .reduce((sum, expense) => sum + expense.amount, 0);
+    .filter((e) => e.category === "want")
+    .reduce((sum, e) => sum + e.amount, 0);
+  const needsPercentage =
+    totalExpenses > 0 ? Math.round((needsTotal / totalExpenses) * 100) : 0;
+  const wantsPercentage =
+    totalExpenses > 0 ? Math.round((wantsTotal / totalExpenses) * 100) : 0;
 
-  const handleAddExpense = async () => {
-    if (!newExpense.name || !newExpense.amount) return;
-    const amount = Number.parseFloat(newExpense.amount);
-    if (isNaN(amount)) return;
-
-    // Shto në backend
-    await agent.Expenses.create({
-      name: newExpense.name,
-      amount,
-      date: new Date().toISOString(),
-      category: newExpense.category,
-      personid: user.id,
+  const formatDate = (date: Date) =>
+    date.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
     });
 
-    // Rifresko
-    await fetchExpenses();
+  const handleAddExpense = () => {
+    if (!newExpense.name || !newExpense.amount) return;
+    const amount = parseFloat(newExpense.amount);
+    if (isNaN(amount)) return;
 
-    // pastro form-in
+    const newItem: Expense = {
+      id: Date.now(),
+      name: newExpense.name,
+      amount,
+      category: newExpense.category,
+      date: new Date(),
+    };
+
+    setExpenses([newItem, ...expenses]);
     setNewExpense({ name: "", amount: "", category: "need" });
     setShowAddExpense(false);
   };
 
-  const formatDate = (date: Date) => {
-    return date.toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-    });
-  };
-
   return (
     <div className="min-h-screen bg-gray-50 relative">
-      {/* Custom Header */}
+      {/* Header */}
       <div className="bg-[#2b2d33] text-white p-4 sticky top-0 z-20">
         <div className="flex items-center">
           <button
@@ -134,7 +81,7 @@ export default function ExpenseTracker({ onClose }: ExpenseTrackerProps) {
         </div>
       </div>
 
-      {/* Main Content */}
+      {/* Content */}
       <div className="p-4">
         {/* Summary */}
         <div className="bg-white rounded-xl border-2 border-gray-200 p-4 mb-6">
@@ -142,7 +89,7 @@ export default function ExpenseTracker({ onClose }: ExpenseTrackerProps) {
           <div className="flex justify-between mb-2">
             <span className="text-gray-600">Total Expenses:</span>
             <span className="font-bold">
-              {summary.total.toLocaleString()} LEK
+              {totalExpenses.toLocaleString()} LEK
             </span>
           </div>
           <div className="flex justify-between mb-2">
@@ -151,7 +98,7 @@ export default function ExpenseTracker({ onClose }: ExpenseTrackerProps) {
               <span className="text-gray-600">Needs:</span>
             </div>
             <span>
-              {summary.needs.toLocaleString()} LEK ({summary.needsPercentage}%)
+              {needsTotal.toLocaleString()} LEK ({needsPercentage}%)
             </span>
           </div>
           <div className="flex justify-between">
@@ -160,46 +107,34 @@ export default function ExpenseTracker({ onClose }: ExpenseTrackerProps) {
               <span className="text-gray-600">Wants:</span>
             </div>
             <span>
-              {summary.wants.toLocaleString()} LEK ({summary.wantsPercentage}%)
+              {wantsTotal.toLocaleString()} LEK ({wantsPercentage}%)
             </span>
           </div>
 
-          {/* Simple Chart */}
+          {/* Chart */}
           <div className="mt-4">
             <div className="w-full h-4 bg-gray-200 rounded-full overflow-hidden flex">
               {totalExpenses > 0 && (
                 <>
                   <div
                     className="h-full bg-green-500"
-                    style={{ width: `${summary.needsPercentage}%` }}
-                  ></div>
+                    style={{ width: `${needsPercentage}%` }}
+                  />
                   <div
                     className="h-full bg-blue-500"
-                    style={{ width: `${summary.wantsPercentage}%` }}
-                  ></div>
+                    style={{ width: `${wantsPercentage}%` }}
+                  />
                 </>
               )}
             </div>
             <div className="flex justify-between mt-1 text-xs text-gray-500">
-              <span>
-                Needs:{" "}
-                {totalExpenses > 0
-                  ? Math.round((needsTotal / totalExpenses) * 100)
-                  : 0}
-                %
-              </span>
-              <span>
-                Wants:{" "}
-                {totalExpenses > 0
-                  ? Math.round((wantsTotal / totalExpenses) * 100)
-                  : 0}
-                %
-              </span>
+              <span>Needs: {needsPercentage}%</span>
+              <span>Wants: {wantsPercentage}%</span>
             </div>
           </div>
         </div>
 
-        {/* Expenses List */}
+        {/* Expense List */}
         <h2 className="text-lg font-bold mb-3">Recent Expenses</h2>
         <div className="space-y-3">
           {expenses.length === 0 ? (
@@ -241,7 +176,7 @@ export default function ExpenseTracker({ onClose }: ExpenseTrackerProps) {
         </div>
       </div>
 
-      {/* Add Expense Button */}
+      {/* Add Button */}
       {!showAddExpense && (
         <button
           onClick={() => setShowAddExpense(true)}
@@ -251,7 +186,7 @@ export default function ExpenseTracker({ onClose }: ExpenseTrackerProps) {
         </button>
       )}
 
-      {/* Add Expense Modal */}
+      {/* Add Modal */}
       <AnimatePresence>
         {showAddExpense && (
           <motion.div
@@ -304,7 +239,10 @@ export default function ExpenseTracker({ onClose }: ExpenseTrackerProps) {
                       className="w-full p-3 border border-gray-300 rounded-lg pr-12"
                       value={newExpense.amount}
                       onChange={(e) =>
-                        setNewExpense({ ...newExpense, amount: e.target.value })
+                        setNewExpense({
+                          ...newExpense,
+                          amount: e.target.value,
+                        })
                       }
                     />
                     <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500">
@@ -330,7 +268,7 @@ export default function ExpenseTracker({ onClose }: ExpenseTrackerProps) {
                     >
                       <div className="w-4 h-4 rounded-full border-2 border-green-500 mr-2 flex items-center justify-center">
                         {newExpense.category === "need" && (
-                          <div className="w-2 h-2 rounded-full bg-green-500"></div>
+                          <div className="w-2 h-2 rounded-full bg-green-500" />
                         )}
                       </div>
                       <span>Need</span>
@@ -347,7 +285,7 @@ export default function ExpenseTracker({ onClose }: ExpenseTrackerProps) {
                     >
                       <div className="w-4 h-4 rounded-full border-2 border-blue-500 mr-2 flex items-center justify-center">
                         {newExpense.category === "want" && (
-                          <div className="w-2 h-2 rounded-full bg-blue-500"></div>
+                          <div className="w-2 h-2 rounded-full bg-blue-500" />
                         )}
                       </div>
                       <span>Want</span>
