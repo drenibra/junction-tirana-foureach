@@ -28,7 +28,6 @@ type ExpenseTrackerProps = {
 
 export default function ExpenseTracker({ onClose }: ExpenseTrackerProps) {
   const user = useSelector((state: any) => state.user);
-  console.log("user", user);
 
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const personId = 3;
