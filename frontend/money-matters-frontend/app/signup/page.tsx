@@ -25,7 +25,6 @@ export default function AuthPage() {
       if (isLogin) {
         // Log in flow
         await agent.Auth.login({ email, password });
-        router.push("/dashboard");
       } else {
         // Sign up flow
         const registeredUser = await agent.Auth.register({
@@ -36,13 +35,12 @@ export default function AuthPage() {
         });
 
         if (registeredUser.status === 201) {
-          // Optionally, you can log in the user immediately after registration
+          // Log in immediately after registration
           await agent.Auth.login({ email, password });
         }
       }
       router.push("/dashboard");
     } catch (err: any) {
-      // you can introspect err.response?.data for more details
       setError(
         isLogin
           ? "Login failed. Please check your credentials."
@@ -56,8 +54,17 @@ export default function AuthPage() {
     setIsLogin(!isLogin);
   };
 
-  const handleContinueAsGuest = () => {
-    router.push("/dashboard");
+  const handleContinueAsGuest = async () => {
+    setError("");
+    try {
+      await agent.Auth.login({
+        email: "rrezart.hetemi@outlook.com",
+        password: "Pa$$w0rd",
+      });
+      router.push("/dashboard");
+    } catch (err: any) {
+      setError("Guest login failed. Please try again later.");
+    }
   };
 
   return (
@@ -171,15 +178,14 @@ export default function AuthPage() {
                 : "Already have an account? Log in instead"}
             </button>
 
-            {/* <div className="mt-2">
-              <p className="text-gray-500 mb-2">or</p>
+            <div className="mt-4">
               <button
                 onClick={handleContinueAsGuest}
                 className="btn-secondary w-full"
               >
                 Continue as Guest
               </button>
-            </div> */}
+            </div>
           </div>
         </motion.div>
       </div>
