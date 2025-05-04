@@ -5,7 +5,7 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /app
 
 # Copy the .csproj and restore dependencies (via NuGet)
-COPY RFMoneyMatters.csproj ./RFMoneyMatters/
+COPY RFMoneyMatters/RFMoneyMatters.csproj ./RFMoneyMatters/
 
 # Restore the dependencies
 RUN dotnet restore RFMoneyMatters/RFMoneyMatters.csproj
@@ -13,8 +13,11 @@ RUN dotnet restore RFMoneyMatters/RFMoneyMatters.csproj
 # Copy the entire project into the container
 COPY . .
 
-# Publish the application in release mode
-RUN dotnet publish ./RFMoneyMatters.csproj -c Release -o /app/publish
+# Set proper permissions for the app directory
+RUN chmod -R 777 /app
+
+# Publish the application in release mode (using a different output directory)
+RUN dotnet publish ./RFMoneyMatters.csproj -c Release -o /tmp/publish
 
 # Use the official .NET runtime image to run the application
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
@@ -23,7 +26,7 @@ FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
 WORKDIR /app
 
 # Copy the published application from the build stage
-COPY --from=build /app/publish .
+COPY --from=build /tmp/publish .
 
 # Expose the port that the app will run on
 EXPOSE 80
