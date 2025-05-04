@@ -5,7 +5,7 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /app
 
 # Copy the .csproj and restore dependencies (via NuGet)
-COPY ./RFMoneyMatters.csproj ./RFMoneyMatters/
+COPY ./RFMoneyMatters/RFMoneyMatters.csproj ./RFMoneyMatters/
 
 # Restore the dependencies
 RUN dotnet restore RFMoneyMatters/RFMoneyMatters.csproj
@@ -17,7 +17,7 @@ COPY . .
 RUN chmod -R 777 /app
 
 # Publish the application in release mode (using a different output directory)
-RUN dotnet publish ./RFMoneyMatters.csproj -c Release -o /tmp/publish
+RUN dotnet publish ../RFMoneyMatters/RFMoneyMatters.csproj -c Release -o /tmp/publish
 
 # Use the official .NET runtime image to run the application
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
