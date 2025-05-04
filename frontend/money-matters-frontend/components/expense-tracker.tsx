@@ -1,130 +1,134 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { motion, AnimatePresence } from "framer-motion"
-import { ArrowLeft, Plus, X, Check } from "lucide-react"
-import agent from "@/app/api_calls/agent"
+import agent from "@/app/api_calls/agent";
+import { AnimatePresence, motion } from "framer-motion";
+import { ArrowLeft, Check, Plus, X } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
 
 type Expense = {
-  id: number
-  name: string
-  amount: number
-  category: "want" | "need"
-  date: Date
-}
+  id: number;
+  name: string;
+  amount: number;
+  category: "want" | "need";
+  date: Date;
+};
 
 type Summary = {
-  total: number
-  needs: number
-  wants: number
-  needsPercentage: number
-  wantsPercentage: number
-}
+  total: number;
+  needs: number;
+  wants: number;
+  needsPercentage: number;
+  wantsPercentage: number;
+};
 
 type ExpenseTrackerProps = {
-  onClose: () => void
-}
-
-
+  onClose: () => void;
+};
 
 export default function ExpenseTracker({ onClose }: ExpenseTrackerProps) {
-  const [expenses, setExpenses] = useState<Expense[]>([])
+  const user = useSelector((state: any) => state.user);
+  console.log("user", user);
+
+  const [expenses, setExpenses] = useState<Expense[]>([]);
   const personId = 3;
   const [summary, setSummary] = useState<Summary>({
     total: 0,
     needs: 0,
     wants: 0,
     needsPercentage: 0,
-    wantsPercentage: 0
-  })
+    wantsPercentage: 0,
+  });
 
-  const [showAddExpense, setShowAddExpense] = useState(false)
+  const [showAddExpense, setShowAddExpense] = useState(false);
   const [newExpense, setNewExpense] = useState<{
-    name: string
-    amount: string
-    category: "want" | "need"
+    name: string;
+    amount: string;
+    category: "want" | "need";
   }>({
     name: "",
     amount: "",
     category: "need",
-  })
+  });
 
   const fetchExpenses = async () => {
     try {
-      const data = await agent.Expenses.getByUser(personId)
+      const data = await agent.Expenses.getByUser(user.id);
+      console.log("data", data);
+
       setExpenses(
         data.map((e: any) => ({
           ...e,
           date: new Date(e.date),
           category: e.category.toLowerCase() as "need" | "want",
         }))
-      )
-      const sum = await agent.Expenses.getSummary(personId)
+      );
+      const sum = await agent.Expenses.getSummary(user.id);
       setSummary({
         total: sum.total,
         needs: sum.needs,
         wants: sum.wants,
         needsPercentage: sum.needsPercentage,
-        wantsPercentage: sum.wantsPercentage
-      })
+        wantsPercentage: sum.wantsPercentage,
+      });
     } catch (err) {
-      console.error("Failed to fetch expenses", err)
+      console.error("Failed to fetch expenses", err);
     }
-  }
+  };
 
   useEffect(() => {
     fetchExpenses();
   }, []);
- 
-  
-  
 
-  const totalExpenses = expenses.reduce((sum, expense) => sum + expense.amount, 0)
+  const totalExpenses = expenses.reduce(
+    (sum, expense) => sum + expense.amount,
+    0
+  );
   const needsTotal = expenses
     .filter((expense) => expense.category === "need")
-    .reduce((sum, expense) => sum + expense.amount, 0)
+    .reduce((sum, expense) => sum + expense.amount, 0);
   const wantsTotal = expenses
     .filter((expense) => expense.category === "want")
-    .reduce((sum, expense) => sum + expense.amount, 0)
+    .reduce((sum, expense) => sum + expense.amount, 0);
 
-    
-
-    const handleAddExpense = async () => {
+  const handleAddExpense = async () => {
     if (!newExpense.name || !newExpense.amount) return;
     const amount = Number.parseFloat(newExpense.amount);
     if (isNaN(amount)) return;
- 
+
     // Shto në backend
     await agent.Expenses.create({
       name: newExpense.name,
       amount,
       date: new Date().toISOString(),
       category: newExpense.category,
-      personId
+      personid: user.id,
     });
-  
+
     // Rifresko
     await fetchExpenses();
- 
+
     // pastro form-in
     setNewExpense({ name: "", amount: "", category: "need" });
     setShowAddExpense(false);
-  }
- 
+  };
 
   const formatDate = (date: Date) => {
     return date.toLocaleDateString("en-US", {
       month: "short",
       day: "numeric",
-    })
-  }
+    });
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 relative">
       {/* Custom Header */}
       <div className="bg-[#2b2d33] text-white p-4 sticky top-0 z-20">
         <div className="flex items-center">
-          <button onClick={onClose} className="p-2 rounded-full hover:bg-gray-700 transition-colors">
+          <button
+            onClick={onClose}
+            className="p-2 rounded-full hover:bg-gray-700 transition-colors"
+          >
             <ArrowLeft size={20} />
           </button>
           <h1 className="text-lg font-bold ml-2">Expense Tracker</h1>
@@ -138,21 +142,27 @@ export default function ExpenseTracker({ onClose }: ExpenseTrackerProps) {
           <h2 className="text-lg font-bold mb-3">Summary</h2>
           <div className="flex justify-between mb-2">
             <span className="text-gray-600">Total Expenses:</span>
-            <span className="font-bold">{summary.total.toLocaleString()} LEK</span>
+            <span className="font-bold">
+              {summary.total.toLocaleString()} LEK
+            </span>
           </div>
           <div className="flex justify-between mb-2">
             <div className="flex items-center">
               <div className="w-3 h-3 rounded-full bg-green-500 mr-2"></div>
               <span className="text-gray-600">Needs:</span>
             </div>
-            <span>{summary.needs.toLocaleString()} LEK ({summary.needsPercentage}%)</span>
+            <span>
+              {summary.needs.toLocaleString()} LEK ({summary.needsPercentage}%)
+            </span>
           </div>
           <div className="flex justify-between">
             <div className="flex items-center">
               <div className="w-3 h-3 rounded-full bg-blue-500 mr-2"></div>
               <span className="text-gray-600">Wants:</span>
             </div>
-            <span>{summary.wants.toLocaleString()} LEK ({summary.wantsPercentage}%)</span>
+            <span>
+              {summary.wants.toLocaleString()} LEK ({summary.wantsPercentage}%)
+            </span>
           </div>
 
           {/* Simple Chart */}
@@ -164,13 +174,28 @@ export default function ExpenseTracker({ onClose }: ExpenseTrackerProps) {
                     className="h-full bg-green-500"
                     style={{ width: `${summary.needsPercentage}%` }}
                   ></div>
-                  <div className="h-full bg-blue-500" style={{ width: `${summary.wantsPercentage}%` }}></div>
+                  <div
+                    className="h-full bg-blue-500"
+                    style={{ width: `${summary.wantsPercentage}%` }}
+                  ></div>
                 </>
               )}
             </div>
             <div className="flex justify-between mt-1 text-xs text-gray-500">
-              <span>Needs: {totalExpenses > 0 ? Math.round((needsTotal / totalExpenses) * 100) : 0}%</span>
-              <span>Wants: {totalExpenses > 0 ? Math.round((wantsTotal / totalExpenses) * 100) : 0}%</span>
+              <span>
+                Needs:{" "}
+                {totalExpenses > 0
+                  ? Math.round((needsTotal / totalExpenses) * 100)
+                  : 0}
+                %
+              </span>
+              <span>
+                Wants:{" "}
+                {totalExpenses > 0
+                  ? Math.round((wantsTotal / totalExpenses) * 100)
+                  : 0}
+                %
+              </span>
             </div>
           </div>
         </div>
@@ -192,7 +217,9 @@ export default function ExpenseTracker({ onClose }: ExpenseTrackerProps) {
               >
                 <div
                   className={`w-10 h-10 rounded-full flex items-center justify-center mr-3 ${
-                    expense.category === "need" ? "bg-green-100 text-green-600" : "bg-blue-100 text-blue-600"
+                    expense.category === "need"
+                      ? "bg-green-100 text-green-600"
+                      : "bg-blue-100 text-blue-600"
                   }`}
                 >
                   {expense.category === "need" ? "N" : "W"}
@@ -200,7 +227,9 @@ export default function ExpenseTracker({ onClose }: ExpenseTrackerProps) {
                 <div className="flex-1">
                   <div className="flex justify-between">
                     <h3 className="font-medium">{expense.name}</h3>
-                    <span className="font-bold">{expense.amount.toLocaleString()} LEK</span>
+                    <span className="font-bold">
+                      {expense.amount.toLocaleString()} LEK
+                    </span>
                   </div>
                   <div className="flex justify-between text-xs text-gray-500 mt-1">
                     <span>{expense.category === "need" ? "Need" : "Want"}</span>
@@ -241,59 +270,86 @@ export default function ExpenseTracker({ onClose }: ExpenseTrackerProps) {
             >
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-lg font-bold">Add Expense</h2>
-                <button onClick={() => setShowAddExpense(false)} className="p-2 rounded-full hover:bg-gray-100">
+                <button
+                  onClick={() => setShowAddExpense(false)}
+                  className="p-2 rounded-full hover:bg-gray-100"
+                >
                   <X size={20} />
                 </button>
               </div>
 
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Expense Name</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Expense Name
+                  </label>
                   <input
                     type="text"
                     placeholder="e.g., Lunch, Movie Ticket"
                     className="w-full p-3 border border-gray-300 rounded-lg"
                     value={newExpense.name}
-                    onChange={(e) => setNewExpense({ ...newExpense, name: e.target.value })}
+                    onChange={(e) =>
+                      setNewExpense({ ...newExpense, name: e.target.value })
+                    }
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Amount (LEK)</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Amount (LEK)
+                  </label>
                   <div className="relative">
                     <input
                       type="number"
                       placeholder="e.g., 500"
                       className="w-full p-3 border border-gray-300 rounded-lg pr-12"
                       value={newExpense.amount}
-                      onChange={(e) => setNewExpense({ ...newExpense, amount: e.target.value })}
+                      onChange={(e) =>
+                        setNewExpense({ ...newExpense, amount: e.target.value })
+                      }
                     />
-                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500">LEK</span>
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500">
+                      LEK
+                    </span>
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Category
+                  </label>
                   <div className="flex space-x-3">
                     <button
                       className={`flex-1 py-3 px-4 rounded-lg border-2 flex items-center justify-center ${
-                        newExpense.category === "need" ? "border-green-500 bg-green-50" : "border-gray-300"
+                        newExpense.category === "need"
+                          ? "border-green-500 bg-green-50"
+                          : "border-gray-300"
                       }`}
-                      onClick={() => setNewExpense({ ...newExpense, category: "need" })}
+                      onClick={() =>
+                        setNewExpense({ ...newExpense, category: "need" })
+                      }
                     >
                       <div className="w-4 h-4 rounded-full border-2 border-green-500 mr-2 flex items-center justify-center">
-                        {newExpense.category === "need" && <div className="w-2 h-2 rounded-full bg-green-500"></div>}
+                        {newExpense.category === "need" && (
+                          <div className="w-2 h-2 rounded-full bg-green-500"></div>
+                        )}
                       </div>
                       <span>Need</span>
                     </button>
                     <button
                       className={`flex-1 py-3 px-4 rounded-lg border-2 flex items-center justify-center ${
-                        newExpense.category === "want" ? "border-blue-500 bg-blue-50" : "border-gray-300"
+                        newExpense.category === "want"
+                          ? "border-blue-500 bg-blue-50"
+                          : "border-gray-300"
                       }`}
-                      onClick={() => setNewExpense({ ...newExpense, category: "want" })}
+                      onClick={() =>
+                        setNewExpense({ ...newExpense, category: "want" })
+                      }
                     >
                       <div className="w-4 h-4 rounded-full border-2 border-blue-500 mr-2 flex items-center justify-center">
-                        {newExpense.category === "want" && <div className="w-2 h-2 rounded-full bg-blue-500"></div>}
+                        {newExpense.category === "want" && (
+                          <div className="w-2 h-2 rounded-full bg-blue-500"></div>
+                        )}
                       </div>
                       <span>Want</span>
                     </button>
@@ -304,7 +360,9 @@ export default function ExpenseTracker({ onClose }: ExpenseTrackerProps) {
                   onClick={handleAddExpense}
                   disabled={!newExpense.name || !newExpense.amount}
                   className={`w-full py-3 rounded-lg font-bold flex items-center justify-center ${
-                    !newExpense.name || !newExpense.amount ? "bg-gray-300 text-gray-500" : "bg-[#ffcc33] text-[#2b2d33]"
+                    !newExpense.name || !newExpense.amount
+                      ? "bg-gray-300 text-gray-500"
+                      : "bg-[#ffcc33] text-[#2b2d33]"
                   }`}
                 >
                   <Check size={20} className="mr-2" />
@@ -316,5 +374,5 @@ export default function ExpenseTracker({ onClose }: ExpenseTrackerProps) {
         )}
       </AnimatePresence>
     </div>
-  )
+  );
 }

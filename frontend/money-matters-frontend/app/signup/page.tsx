@@ -4,10 +4,13 @@ import { motion } from "framer-motion";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
+import { useDispatch } from "react-redux";
 import agent from "../api_calls/agent";
+import { setUser } from "../store/slices/userSlice";
 
 export default function AuthPage() {
   const router = useRouter();
+  const dispatch = useDispatch();
 
   // form mode & fields
   const [isLogin, setIsLogin] = useState(false);
@@ -23,22 +26,19 @@ export default function AuthPage() {
 
     try {
       if (isLogin) {
-        // Log in flow
-        await agent.Auth.login({ email, password });
-      } else {
-        // Sign up flow
-        const registeredUser = await agent.Auth.register({
-          name,
-          email,
-          password,
-          confirmPassword,
-        });
+        // ---- existing login flow ----
+        const response = await agent.Auth.login({ email, password });
+        console.log(response);
 
-        if (registeredUser.status === 201) {
-          // Log in immediately after registration
-          await agent.Auth.login({ email, password });
-        }
+        dispatch(setUser({ id: response.id, email: response.username }));
+      } else {
+        // ---- sign-up flow ----
+        await agent.Auth.register({ name, email, password, confirmPassword });
+        // immediately log in, no status check needed
+        const response = await agent.Auth.login({ email, password });
+        dispatch(setUser(response));
       }
+
       router.push("/dashboard");
     } catch (err: any) {
       setError(

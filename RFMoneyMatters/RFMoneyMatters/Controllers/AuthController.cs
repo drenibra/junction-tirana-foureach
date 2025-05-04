@@ -89,22 +89,59 @@ namespace RFMoneyMatters.Controllers
         }
 
 
-        [Authorize]
         [HttpGet("me")]
         public async Task<ActionResult<CurrentUserDto>> Me()
         {
-            var user = await _userMgr.GetUserAsync(User);
+            // 1) Pull the JWT out of the cookie
+            var token = Request.Cookies["token"];
+            if (string.IsNullOrWhiteSpace(token))
+                return Unauthorized();
+
+            // 2) Prepare validation parameters from your config
+            var keyBytes = Encoding.UTF8.GetBytes(_config["TokenKey"]);
+            var validationParams = new TokenValidationParameters
+            {
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey         = new SymmetricSecurityKey(keyBytes),
+                ValidateIssuer           = true,
+                ValidIssuer              = _config["JwtSettings:Issuer"],
+                ValidateAudience         = true,
+                ValidAudience            = _config["JwtSettings:Audience"],
+                ClockSkew                = TimeSpan.Zero
+            };
+
+            // 3) Validate & decode
+            ClaimsPrincipal principal;
+            try
+            {
+                principal = new JwtSecurityTokenHandler()
+                    .ValidateToken(token, validationParams, out _);
+            }
+            catch
+            {
+                return Unauthorized();
+            }
+
+            // 4) Extract the user Id from the "sub" claim
+            var userId = principal.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
+            if (string.IsNullOrWhiteSpace(userId))
+                return Unauthorized();
+
+            // 5) Load the user from the database
+            var user = await _userMgr.FindByIdAsync(userId);
             if (user == null)
                 return Unauthorized();
 
+            // 6) Return your DTO
             return Ok(new CurrentUserDto
             {
-                Id = user.Id,
-                Email = user.Email,
+                Id       = user.Id,
+                Email    = user.Email,
                 UserName = user.UserName
                 // add other props as needed
             });
         }
+
 
         [HttpPost("logout")]
         public async Task<IActionResult> Logout()

@@ -13,6 +13,7 @@ using RFMoneyMatters.Implementation.Services;
 using RFMoneyMatters.Models;
 using RFMoneyMatters.Services;
 using System.Text;
+using RFMoneyMatters.CurrentUser;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -56,6 +57,7 @@ builder.Services.AddScoped<IUserChallengeService, UserChallengeService>();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddCurrentUser();
 
 var app = builder.Build();
 
@@ -67,10 +69,10 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
+app.UseRouting();
 app.UseCors("CorsPolicy");
-
 app.UseAuthentication();
+app.AddCurrentUserMiddleware();
 
 app.UseAuthorization();
 
