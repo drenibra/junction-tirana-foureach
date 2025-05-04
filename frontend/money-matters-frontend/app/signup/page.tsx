@@ -78,10 +78,10 @@ export default function AuthPage() {
         >
           <div className="flex justify-center mb-6">
             <Image
-              src="/images/raibuddy.png"
+              src="images/greeting-raistar.gif"
               alt="RaiBuddy"
-              width={100}
-              height={100}
+              width={350}
+              height={350}
             />
           </div>
 

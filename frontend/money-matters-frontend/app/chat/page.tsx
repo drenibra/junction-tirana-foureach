@@ -27,7 +27,7 @@ export default function Chat() {
 
   // List of GIFs to show during loading
   const loadingGifs = [
-    "loading-raistar.gif", // Money spinning
+    "images/loading-raistar.gif", // Money spinning
     // "https://media.giphy.com/media/l0Iyl55kTeh71nTWw/giphy.gif", // Piggy bank
     // "https://media.giphy.com/media/3o6Zta4cADxl2i4fZu/giphy.gif", // Cash flow
     // "https://media.giphy.com/media/26ufnwz3wDUli7GU0/giphy.gif", // Loading coins
@@ -223,12 +223,12 @@ export default function Chat() {
               }`}
             >
               {chat.sender === "bot" && (
-                <div className='w-8 h-8 mr-2 flex-shrink-0'>
+                <div className='w-16 h-16 mr-2 flex-shrink-0'>
                   <Image
                     src='/images/raibuddy.png'
                     alt='RaiBuddy'
-                    width={32}
-                    height={32}
+                    width={64}
+                    height={64}
                   />
                 </div>
               )}
