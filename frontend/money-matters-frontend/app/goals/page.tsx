@@ -1,19 +1,19 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import Image from "next/image"
-import { motion, AnimatePresence } from "framer-motion"
-import { Plus, PieChart, X, Check, ArrowUp } from "lucide-react"
-import BottomNavigation from "@/components/bottom-navigation"
-import ExpenseTracker from "@/components/expense-tracker"
+import BottomNavigation from "@/components/bottom-navigation";
+import ExpenseTracker from "@/components/expense-tracker";
+import { AnimatePresence, motion } from "framer-motion";
+import { ArrowUp, Check, PieChart, Plus, X } from "lucide-react";
+import Image from "next/image";
+import { useEffect, useState } from "react";
 
 type Goal = {
-  id: number
-  name: string
-  amount: number
-  saved: number
-  image: string
-}
+  id: number;
+  name: string;
+  amount: number;
+  saved: number;
+  image: string;
+};
 
 export default function Goals() {
   const [goals, setGoals] = useState<Goal[]>([
@@ -31,52 +31,52 @@ export default function Goals() {
       saved: 1500,
       image: "/placeholder.svg?key=g9s4r",
     },
-  ])
+  ]);
 
-  const [showExpenseTracker, setShowExpenseTracker] = useState(false)
-  const [selectedGoal, setSelectedGoal] = useState<Goal | null>(null)
-  const [showAddProgress, setShowAddProgress] = useState(false)
-  const [progressAmount, setProgressAmount] = useState("")
+  const [showExpenseTracker, setShowExpenseTracker] = useState(false);
+  const [selectedGoal, setSelectedGoal] = useState<Goal | null>(null);
+  const [showAddProgress, setShowAddProgress] = useState(false);
+  const [progressAmount, setProgressAmount] = useState("");
 
   useEffect(() => {
     setShowExpenseTracker(true);
   }, []);
 
   const handleAddProgress = () => {
-    if (!selectedGoal || !progressAmount) return
+    if (!selectedGoal || !progressAmount) return;
 
-    const amount = Number.parseFloat(progressAmount)
-    if (isNaN(amount) || amount <= 0) return
+    const amount = Number.parseFloat(progressAmount);
+    if (isNaN(amount) || amount <= 0) return;
 
     // Update the selected goal's saved amount
     const updatedGoals = goals.map((goal) => {
       if (goal.id === selectedGoal.id) {
         // Make sure we don't exceed the goal amount
-        const newSaved = Math.min(goal.saved + amount, goal.amount)
-        return { ...goal, saved: newSaved }
+        const newSaved = Math.min(goal.saved + amount, goal.amount);
+        return { ...goal, saved: newSaved };
       }
-      return goal
-    })
+      return goal;
+    });
 
-    setGoals(updatedGoals)
+    setGoals(updatedGoals);
 
     // Update the selected goal reference
-    const updatedGoal = updatedGoals.find((g) => g.id === selectedGoal.id)
+    const updatedGoal = updatedGoals.find((g) => g.id === selectedGoal.id);
     if (updatedGoal) {
-      setSelectedGoal(updatedGoal)
+      setSelectedGoal(updatedGoal);
     }
 
-    setProgressAmount("")
-    setShowAddProgress(false)
-  }
+    setProgressAmount("");
+    setShowAddProgress(false);
+  };
 
   const handleGoalClick = (goal: Goal) => {
-    setSelectedGoal(goal)
-  }
+    setSelectedGoal(goal);
+  };
 
   const closeGoalDetail = () => {
-    setSelectedGoal(null)
-  }
+    setSelectedGoal(null);
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
@@ -91,7 +91,9 @@ export default function Goals() {
           <div className="p-4">
             <div className="mb-6">
               <h2 className="text-xl font-bold mb-2">Your Goals</h2>
-              <p className="text-gray-600">Track your progress towards your savings goals</p>
+              <p className="text-gray-600">
+                Track your progress towards your savings goals
+              </p>
             </div>
 
             <div className="space-y-4">
@@ -119,13 +121,16 @@ export default function Goals() {
                       <div className="flex justify-between text-sm mb-1 mt-2">
                         <span>Progress</span>
                         <span>
-                          {goal.saved.toLocaleString()} / {goal.amount.toLocaleString()} LEK
+                          {goal.saved.toLocaleString()} /{" "}
+                          {goal.amount.toLocaleString()} LEK
                         </span>
                       </div>
                       <div className="w-full bg-gray-200 rounded-full h-2.5 mb-2">
                         <div
                           className="bg-[#ffcc33] h-2.5 rounded-full"
-                          style={{ width: `${(goal.saved / goal.amount) * 100}%` }}
+                          style={{
+                            width: `${(goal.saved / goal.amount) * 100}%`,
+                          }}
                         ></div>
                       </div>
                       <div className="text-right text-sm text-gray-600">
@@ -206,33 +211,48 @@ export default function Goals() {
                     <div className="flex justify-between text-sm mb-1">
                       <span>Progress</span>
                       <span>
-                        {selectedGoal.saved.toLocaleString()} / {selectedGoal.amount.toLocaleString()} LEK
+                        {selectedGoal.saved.toLocaleString()} /{" "}
+                        {selectedGoal.amount.toLocaleString()} LEK
                       </span>
                     </div>
                     <div className="w-full bg-gray-200 rounded-full h-3 mb-2">
                       <div
                         className="bg-[#ffcc33] h-3 rounded-full"
-                        style={{ width: `${(selectedGoal.saved / selectedGoal.amount) * 100}%` }}
+                        style={{
+                          width: `${
+                            (selectedGoal.saved / selectedGoal.amount) * 100
+                          }%`,
+                        }}
                       ></div>
                     </div>
                     <div className="text-center text-sm font-medium">
-                      {Math.round((selectedGoal.saved / selectedGoal.amount) * 100)}% saved
+                      {Math.round(
+                        (selectedGoal.saved / selectedGoal.amount) * 100
+                      )}
+                      % saved
                     </div>
                   </div>
 
                   <div className="mb-6">
                     <div className="flex justify-between mb-2">
                       <span className="text-gray-600">Target Amount:</span>
-                      <span className="font-bold">{selectedGoal.amount.toLocaleString()} LEK</span>
+                      <span className="font-bold">
+                        {selectedGoal.amount.toLocaleString()} LEK
+                      </span>
                     </div>
                     <div className="flex justify-between mb-2">
                       <span className="text-gray-600">Saved So Far:</span>
-                      <span className="font-bold">{selectedGoal.saved.toLocaleString()} LEK</span>
+                      <span className="font-bold">
+                        {selectedGoal.saved.toLocaleString()} LEK
+                      </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-600">Still Needed:</span>
                       <span className="font-bold">
-                        {(selectedGoal.amount - selectedGoal.saved).toLocaleString()} LEK
+                        {(
+                          selectedGoal.amount - selectedGoal.saved
+                        ).toLocaleString()}{" "}
+                        LEK
                       </span>
                     </div>
                   </div>
@@ -264,11 +284,18 @@ export default function Goals() {
                   exit={{ scale: 0.9, y: 20 }}
                   className="bg-white rounded-xl border-2 border-gray-200 p-5 w-full max-w-sm relative"
                 >
-                  <h3 className="text-xl font-bold mb-4">Add Progress to Goal</h3>
-                  <p className="text-gray-600 mb-4">How much have you saved towards your {selectedGoal.name} goal?</p>
+                  <h3 className="text-xl font-bold mb-4">
+                    Add Progress to Goal
+                  </h3>
+                  <p className="text-gray-600 mb-4">
+                    How much have you saved towards your {selectedGoal.name}{" "}
+                    goal?
+                  </p>
 
                   <div className="mb-6">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Amount (LEK)</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Amount (LEK)
+                    </label>
                     <div className="relative">
                       <input
                         type="number"
@@ -277,11 +304,16 @@ export default function Goals() {
                         value={progressAmount}
                         onChange={(e) => setProgressAmount(e.target.value)}
                       />
-                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500">LEK</span>
+                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500">
+                        LEK
+                      </span>
                     </div>
                     <p className="text-xs text-gray-500 mt-1">
-                      You still need {(selectedGoal.amount - selectedGoal.saved).toLocaleString()} LEK to reach your
-                      goal
+                      You still need{" "}
+                      {(
+                        selectedGoal.amount - selectedGoal.saved
+                      ).toLocaleString()}{" "}
+                      LEK to reach your goal
                     </p>
                   </div>
 
@@ -294,9 +326,13 @@ export default function Goals() {
                     </button>
                     <button
                       onClick={handleAddProgress}
-                      disabled={!progressAmount || Number.parseFloat(progressAmount) <= 0}
+                      disabled={
+                        !progressAmount ||
+                        Number.parseFloat(progressAmount) <= 0
+                      }
                       className={`flex-1 py-3 rounded-lg font-bold flex items-center justify-center ${
-                        !progressAmount || Number.parseFloat(progressAmount) <= 0
+                        !progressAmount ||
+                        Number.parseFloat(progressAmount) <= 0
                           ? "bg-gray-300 text-gray-500"
                           : "bg-[#ffcc33] text-[#2b2d33]"
                       }`}
@@ -314,5 +350,5 @@ export default function Goals() {
         <ExpenseTracker onClose={() => setShowExpenseTracker(false)} />
       )}
     </div>
-  )
+  );
 }
